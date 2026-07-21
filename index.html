@@ -135,11 +135,17 @@
   } else {
     try{
       const data = JSON.parse(b64urlDecode(raw));
+      var correoUsuario = '';
       app.innerHTML =
         '<div class="gift">🎁</div>' +
         '<h1>Hola, ' + esc(data.d) + '</h1>' +
-        '<p class="saludo">Tu amigo invisible ya está sorteado. ¿Lista/o para descubrirlo?</p>' +
-        '<button id="btn" type="button">Descubrir 🎄</button>' +
+        '<div class="mailbox" id="pasoCorreo" style="border-top:none;padding-top:0;margin-top:16px">' +
+          '<label class="lbl2" for="correo">Ingresá tu correo para ver tu amigo invisible</label>' +
+          '<input id="correo" type="email" inputmode="email" autocomplete="email" ' +
+            'placeholder="tucorreo@ejemplo.com">' +
+          '<button id="btn" type="button">Descubrir 🎄</button>' +
+          '<p class="hint" id="hint"></p>' +
+        '</div>' +
         '<div class="reveal" id="reveal">' +
           '<div class="box">' +
             '<p class="lbl">Te toca regalarle a</p>' +
@@ -147,33 +153,37 @@
           '</div>' +
           '<p class="secreto">Que quede entre nosotros 🤫</p>' +
           '<div class="mailbox">' +
-            '<label class="lbl2" for="correo">¿Querés guardarlo en tu correo?</label>' +
-            '<input id="correo" type="email" inputmode="email" autocomplete="email" ' +
-              'placeholder="tucorreo@ejemplo.com">' +
-            '<button id="enviar" class="btn2" type="button">📩 Enviármelo por correo</button>' +
-            '<p class="hint" id="hint"></p>' +
+            '<button id="enviar" class="btn2" type="button">📩 Recibirlo en mi correo</button>' +
+            '<p class="hint" id="hint2"></p>' +
           '</div>' +
         '</div>';
+
       document.getElementById('btn').addEventListener('click', function(){
-        this.style.display = 'none';
-        document.querySelector('.saludo').style.display = 'none';
-        document.getElementById('reveal').classList.add('show');
-      });
-      document.getElementById('enviar').addEventListener('click', function(){
         var mail = document.getElementById('correo').value.trim();
         var hint = document.getElementById('hint');
         if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(mail)){
           hint.textContent = 'Escribí un correo válido, por ejemplo nombre@gmail.com';
+          document.getElementById('correo').focus();
           return;
         }
+        correoUsuario = mail;
+        document.getElementById('pasoCorreo').style.display = 'none';
+        document.getElementById('reveal').classList.add('show');
+      });
+      document.getElementById('correo').addEventListener('keydown', function(e){
+        if(e.key === 'Enter') document.getElementById('btn').click();
+      });
+
+      document.getElementById('enviar').addEventListener('click', function(){
         var asunto = 'Tu amigo invisible 🎁';
         var cuerpo = 'Hola ' + data.d + ',\n\n' +
           'Tu amigo invisible: te toca regalarle a ' + data.p + '.\n\n' +
           'Recordá que es secreto 🤫';
-        var url = 'mailto:' + encodeURIComponent(mail) +
+        var url = 'mailto:' + encodeURIComponent(correoUsuario) +
           '?subject=' + encodeURIComponent(asunto) +
           '&body=' + encodeURIComponent(cuerpo);
-        hint.textContent = 'Abriendo tu app de correo… solo tenés que tocar Enviar.';
+        document.getElementById('hint2').textContent =
+          'Abriendo tu app de correo… solo tenés que tocar Enviar.';
         window.location.href = url;
       });
     }catch(e){
