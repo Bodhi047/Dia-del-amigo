@@ -1,0 +1,147 @@
+<title>Amigo Invisible</title>
+<style>
+  :root{
+    --bg-1:#f7f0e6; --bg-2:#efe4d3; --ink:#2b2119; --ink-soft:#6f6355;
+    --card:#fffaf2; --line:#e4d6c1;
+    --gold:#b8791f; --gold-deep:#8a5a12;
+    --pine:#2f6d4f; --pine-soft:#eaf3ec;
+    --shadow:rgba(70,45,10,.14);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg-1:#161311; --bg-2:#1e1813; --ink:#f0e7da; --ink-soft:#b3a794;
+      --card:#241d17; --line:#3a2f24;
+      --gold:#e8b45c; --gold-deep:#d69a3a;
+      --pine:#6fcf97; --pine-soft:#1a2a20;
+      --shadow:rgba(0,0,0,.4);
+    }
+  }
+  :root[data-theme="light"]{
+    --bg-1:#f7f0e6; --bg-2:#efe4d3; --ink:#2b2119; --ink-soft:#6f6355;
+    --card:#fffaf2; --line:#e4d6c1; --gold:#b8791f; --gold-deep:#8a5a12;
+    --pine:#2f6d4f; --pine-soft:#eaf3ec; --shadow:rgba(70,45,10,.14);
+  }
+  :root[data-theme="dark"]{
+    --bg-1:#161311; --bg-2:#1e1813; --ink:#f0e7da; --ink-soft:#b3a794;
+    --card:#241d17; --line:#3a2f24; --gold:#e8b45c; --gold-deep:#d69a3a;
+    --pine:#6fcf97; --pine-soft:#1a2a20; --shadow:rgba(0,0,0,.4);
+  }
+
+  *{box-sizing:border-box}
+  body{
+    margin:0; min-height:100vh;
+    background:radial-gradient(circle at 50% -10%, var(--bg-2), var(--bg-1) 60%);
+    color:var(--ink);
+    font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+    display:flex; align-items:center; justify-content:center; padding:24px;
+  }
+  .card{
+    background:var(--card); width:100%; max-width:440px;
+    border:1px solid var(--line); border-radius:20px;
+    box-shadow:0 24px 60px -20px var(--shadow);
+    padding:40px 32px; text-align:center; position:relative; overflow:hidden;
+  }
+  .eyebrow{
+    font-family:ui-sans-serif,-apple-system,"Segoe UI",Roboto,sans-serif;
+    font-size:12px; letter-spacing:.22em; text-transform:uppercase;
+    color:var(--gold-deep); font-weight:600; margin:0 0 6px;
+  }
+  h1{ font-size:26px; font-weight:600; margin:0 0 4px; letter-spacing:-.01em; }
+  .gift{ font-size:56px; line-height:1; margin:8px 0 18px; display:inline-block; }
+  .saludo{ color:var(--ink-soft); font-size:16px; margin:0 0 24px; }
+  .saludo b{ color:var(--ink); }
+
+  button{
+    font-family:ui-sans-serif,-apple-system,"Segoe UI",Roboto,sans-serif;
+    font-size:15px; font-weight:600; cursor:pointer;
+    background:var(--gold); color:#fff; border:none;
+    padding:14px 28px; border-radius:12px; letter-spacing:.01em;
+    box-shadow:0 8px 20px -8px var(--gold); transition:transform .12s, box-shadow .12s;
+  }
+  button:hover{ transform:translateY(-2px); box-shadow:0 12px 24px -8px var(--gold); }
+  button:active{ transform:translateY(0); }
+  button:focus-visible{ outline:3px solid var(--gold); outline-offset:3px; }
+
+  .reveal{ display:none; }
+  .reveal.show{ display:block; animation:pop .5s cubic-bezier(.2,.8,.2,1); }
+  @keyframes pop{ from{opacity:0; transform:scale(.9)} to{opacity:1; transform:scale(1)} }
+  .box{
+    background:var(--pine-soft); border:1px solid var(--line);
+    border-radius:16px; padding:26px 20px; margin-top:6px;
+  }
+  .box .lbl{
+    font-family:ui-sans-serif,-apple-system,"Segoe UI",Roboto,sans-serif;
+    font-size:12px; letter-spacing:.16em; text-transform:uppercase;
+    color:var(--ink-soft); margin:0 0 10px;
+  }
+  .name{ font-size:38px; font-weight:600; color:var(--pine); margin:0; line-height:1.1;
+    text-wrap:balance; letter-spacing:-.02em; }
+  .secreto{ color:var(--ink-soft); font-size:14px; margin:18px 0 0; }
+  .aviso{ color:var(--ink-soft); font-size:15px; line-height:1.5; margin:10px 0 0; }
+  @media (prefers-reduced-motion: reduce){
+    button{transition:none} .reveal.show{animation:none}
+  }
+</style>
+
+<div class="card">
+  <p class="eyebrow">Amigo Invisible</p>
+
+  <div id="app">
+    <div class="gift">🎁</div>
+    <h1 id="titulo">Cargando…</h1>
+  </div>
+</div>
+
+<script>
+  function b64urlDecode(str){
+    str = str.replace(/-/g,'+').replace(/_/g,'/');
+    while (str.length % 4) str += '=';
+    const bin = atob(str);
+    const bytes = Uint8Array.from(bin, c => c.charCodeAt(0));
+    return new TextDecoder('utf-8').decode(bytes);
+  }
+
+  function esc(s){
+    return String(s).replace(/[&<>"']/g, c => (
+      {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]
+    ));
+  }
+
+  const app = document.getElementById('app');
+  const raw = location.hash.slice(1);
+
+  if(!raw){
+    app.innerHTML =
+      '<div class="gift">✉️</div>' +
+      '<h1>Abrí tu link privado</h1>' +
+      '<p class="aviso">Esta página muestra tu amigo invisible solo si entrás ' +
+      'por el enlace personal que te enviaron. Pedíselo a quien organiza el sorteo.</p>';
+  } else {
+    try{
+      const data = JSON.parse(b64urlDecode(raw));
+      app.innerHTML =
+        '<div class="gift">🎁</div>' +
+        '<h1>Hola, ' + esc(data.d) + '</h1>' +
+        '<p class="saludo">Tu amigo invisible ya está sorteado. ¿Lista/o para descubrirlo?</p>' +
+        '<button id="btn" type="button">Descubrir 🎄</button>' +
+        '<div class="reveal" id="reveal">' +
+          '<div class="box">' +
+            '<p class="lbl">Te toca regalarle a</p>' +
+            '<p class="name">' + esc(data.p) + '</p>' +
+          '</div>' +
+          '<p class="secreto">Que quede entre nosotros 🤫</p>' +
+        '</div>';
+      document.getElementById('btn').addEventListener('click', function(){
+        this.style.display = 'none';
+        document.querySelector('.saludo').style.display = 'none';
+        document.getElementById('reveal').classList.add('show');
+      });
+    }catch(e){
+      app.innerHTML =
+        '<div class="gift">⚠️</div>' +
+        '<h1>Link inválido</h1>' +
+        '<p class="aviso">No pudimos leer este enlace. Puede que se haya cortado al copiarlo. ' +
+        'Pedí de nuevo tu link completo a quien organiza el sorteo.</p>';
+    }
+  }
+</script>
